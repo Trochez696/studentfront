@@ -59,9 +59,9 @@ export default function MateriasScreen() {
   const [assignTeacherId, setAssignTeacherId] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Cargar lista de materias desde el backend
   const fetchSubjects = async () => {
     if (!token) return;
+    // reset error y activar spinner
     setError(null);
     setLoading(true);
     try {
@@ -80,9 +80,9 @@ export default function MateriasScreen() {
     }
   };
 
-  // Cargar inscripciones solo para estudiantes
   const fetchEnrollments = async () => {
     if (!token || user?.role !== 'ESTUDIANTE') return;
+    // obtener inscripciones del estudiante
     try {
       const response = await fetch(`${API_URL}/enrollments/my`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -97,8 +97,8 @@ export default function MateriasScreen() {
     }
   };
 
-  // Cargar docentes para el admin
   const fetchTeachers = async () => {
+    // obtener lista de docentes para asignar materias
     if (!token || user?.role !== 'ADMIN') return;
     try {
       const response = await fetch(`${API_URL}/users?role=DOCENTE`, {
@@ -114,8 +114,8 @@ export default function MateriasScreen() {
     }
   };
 
-  // Cargar materias asignadas al docente
   const fetchAssignedSubjects = async () => {
+    // obtener materias donde el docente está asignado
     if (!token || user?.role !== 'DOCENTE') return;
     try {
       const response = await fetch(`${API_URL}/subjects/assigned`, {
@@ -155,9 +155,9 @@ export default function MateriasScreen() {
     if (user?.role === 'DOCENTE') fetchAssignedSubjects();
   }, [token, user?.role]);
 
-  // Enviar solicitud para inscribirse en una materia
   const handleEnroll = async () => {
     if (!token || !subjectId) return;
+    // iniciar inscripcion seleccionada
     setError(null);
     setLoading(true);
     setSuccessMessage(null);
@@ -184,8 +184,8 @@ export default function MateriasScreen() {
     }
   };
 
-  // Crear un nuevo docente (solo admin)
   const createTeacher = async () => {
+    // crear docente nuevo cuando sea admin
     if (!token || !newTeacherName || !newTeacherEmail || !newTeacherPassword) return;
     setError(null);
     setLoading(true);
@@ -221,28 +221,30 @@ export default function MateriasScreen() {
     }
   };
 
-  // Crear una materia nueva (solo admin)
   const createSubject = async () => {
+    // crear materia nueva para el sistema
     if (!token || !newSubjectName || !newSubjectCode) return;
     setError(null);
     setLoading(true);
     setSuccessMessage(null);
     try {
+      const payload: { nombre: string; codigo: string } = {
+        nombre: newSubjectName.trim(),
+        codigo: newSubjectCode.trim(),
+      };
+
       const response = await fetch(`${API_URL}/subjects`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          nombre: newSubjectName,
-          codigo: newSubjectCode,
-          descripcion: newSubjectDescription,
-        }),
+        body: JSON.stringify(payload),
       });
       const body = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(body?.message || 'No se pudo crear la materia');
+        const backendMessage = Array.isArray(body?.message) ? body.message.join(', ') : body?.message;
+        throw new Error(backendMessage || 'No se pudo crear la materia');
       }
       setNewSubjectName('');
       setNewSubjectCode('');
@@ -256,8 +258,8 @@ export default function MateriasScreen() {
     }
   };
 
-  // Asignar un docente a una materia (solo admin)
   const assignTeacher = async () => {
+    // asignar docente a materia seleccionada
     if (!token || !assignSubjectId || !assignTeacherId) return;
     setError(null);
     setLoading(true);
@@ -287,8 +289,8 @@ export default function MateriasScreen() {
     }
   };
 
-  // Si no hay token, mostrar mensaje simple y no renderizar el resto
   if (!token) {
+    // no hay sesión válida, pedir login
     return (
       <SafeAreaView style={styles.container}>
         <Text style={styles.title}>Inicia sesión primero</Text>
@@ -300,6 +302,7 @@ export default function MateriasScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* encabezado principal */}
         <View style={styles.headerRow}>
           <View>
             <View style={styles.titleRow}>
@@ -313,6 +316,7 @@ export default function MateriasScreen() {
           </View>
         </View>
 
+        {/* resumen rápido */}
         <View style={styles.statsRow}>
           <View style={styles.statsCard}>
             <MaterialIcons name="menu-book" size={20} color="#1d4ed8" />
@@ -335,12 +339,15 @@ export default function MateriasScreen() {
           ) : null}
         </View>
 
+        {/* acciones principales */}
         <View style={styles.actionSection}>
           <Button title="Actualizar materias" onPress={fetchSubjects} disabled={loading} />
         </View>
 
+        {/* mensajes de estado */}
         {error ? <Text style={styles.error}>{error}</Text> : null}
         {successMessage ? <Text style={styles.success}>{successMessage}</Text> : null}
+        {/* lista de materias */}
         <FlatList
           data={subjects}
           keyExtractor={(item) => String(item.id)}
@@ -362,6 +369,7 @@ export default function MateriasScreen() {
         />
 
         {user?.role === 'ESTUDIANTE' ? (
+          // sección de estudiante
           <View style={styles.enrollCard}>
             <View style={styles.sectionTitleRow}>
               <Ionicons name="person-circle-outline" size={20} color="#0f766e" />
@@ -399,6 +407,7 @@ export default function MateriasScreen() {
         ) : null}
 
         {user?.role === 'DOCENTE' ? (
+          // sección de docente
           <View style={styles.sectionCard}>
             <View style={styles.sectionTitleRow}>
               <Ionicons name="person-outline" size={20} color="#be123c" />
@@ -426,6 +435,7 @@ export default function MateriasScreen() {
         ) : null}
 
         {user?.role === 'ADMIN' ? (
+          // sección de administrador
           <View style={styles.sectionCard}>
             <View style={styles.sectionTitleRow}>
               <Ionicons name="settings-outline" size={20} color="#a21caf" />

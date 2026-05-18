@@ -147,7 +147,6 @@ export default function LoginPage() {
 
       <View style={styles.infoBox}>
         <Text style={styles.infoText}>Crea una cuenta como estudiante para probar inscripciones.</Text>
-        <Text style={styles.infoText}>Admin: admin@uni.com / admin123</Text>
         <Text style={styles.infoText}>Docente: usa una cuenta con rol DOCENTE para ver asignaciones.</Text>
       </View>
     </SafeAreaView>
