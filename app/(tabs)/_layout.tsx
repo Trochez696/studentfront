@@ -1,7 +1,6 @@
 import React from 'react';
-import { SymbolView } from 'expo-symbols';
-import { Link, Tabs } from 'expo-router';
-import { Platform, Pressable } from 'react-native';
+import { Tabs } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
@@ -22,6 +21,10 @@ export default function TabLayout() {
           height: 70,
           paddingBottom: 6,
         },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '700',
+        },
         headerStyle: {
           backgroundColor: '#f8fbff',
           shadowColor: '#000',
@@ -41,11 +44,11 @@ export default function TabLayout() {
         name="dashboard"
         options={{
           title: 'Inicio',
-          tabBarIcon: ({ color }) => (
-            <SymbolView
-              name={{ ios: 'home', android: 'home', web: 'home' }}
-              tintColor={color}
-              size={28}
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'home' : 'home-outline'}
+              color={focused ? '#16a34a' : color}
+              size={24}
             />
           ),
         }}
@@ -54,11 +57,11 @@ export default function TabLayout() {
         name="materias"
         options={{
           title: 'Materias',
-          tabBarIcon: ({ color }) => (
-            <SymbolView
-              name={{ ios: 'book', android: 'book', web: 'book' }}
-              tintColor={color}
-              size={28}
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'book' : 'book-outline'}
+              color={focused ? '#2563eb' : color}
+              size={24}
             />
           ),
         }}
@@ -67,11 +70,11 @@ export default function TabLayout() {
         name="perfil"
         options={{
           title: 'Perfil',
-          tabBarIcon: ({ color }) => (
-            <SymbolView
-              name={{ ios: 'person', android: 'person', web: 'person' }}
-              tintColor={color}
-              size={28}
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'person-circle' : 'person-circle-outline'}
+              color={focused ? '#f59e0b' : color}
+              size={24}
             />
           ),
         }}

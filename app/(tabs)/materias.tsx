@@ -36,6 +36,13 @@ type Student = {
   email: string;
 };
 
+type SubjectStudentsResponseItem =
+  | Student
+  | {
+      id: number;
+      student?: Student;
+    };
+
 export default function MateriasScreen() {
   const { token, user, logout } = useAuth();
   const router = useRouter();
@@ -152,8 +159,11 @@ export default function MateriasScreen() {
       if (!response.ok) {
         throw new Error('No se pudieron cargar los estudiantes de la materia');
       }
-      const data = await response.json();
-      setSubjectStudents((prev) => ({ ...prev, [id]: data }));
+      const data: SubjectStudentsResponseItem[] = await response.json();
+      const students = data
+        .map((item) => ('student' in item && item.student ? item.student : (item as Student)))
+        .filter((student): student is Student => Boolean(student?.id));
+      setSubjectStudents((prev) => ({ ...prev, [id]: students }));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
     }
