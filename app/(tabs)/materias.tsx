@@ -27,6 +27,7 @@ type Enrollment = {
   id: number;
   subjectId: number;
   studentId: number;
+  subject?: Subject;
 };
 
 type Student = {
@@ -58,6 +59,17 @@ export default function MateriasScreen() {
   const [assignSubjectId, setAssignSubjectId] = useState('');
   const [assignTeacherId, setAssignTeacherId] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const getEnrollmentSubjectLabel = (enrollment: Enrollment) => {
+    if (enrollment.subject?.nombre) {
+      return `${enrollment.subject.nombre}${enrollment.subject.codigo ? ` (${enrollment.subject.codigo})` : ''}`;
+    }
+    const subject = subjects.find((item) => item.id === enrollment.subjectId);
+    if (subject) {
+      return `${subject.nombre} (${subject.codigo})`;
+    }
+    return `ID ${enrollment.subjectId}`;
+  };
 
   const fetchSubjects = async () => {
     if (!token) return;
@@ -228,10 +240,14 @@ export default function MateriasScreen() {
     setLoading(true);
     setSuccessMessage(null);
     try {
-      const payload: { nombre: string; codigo: string } = {
+      const payload: { nombre: string; codigo: string; descripcion?: string } = {
         nombre: newSubjectName.trim(),
         codigo: newSubjectCode.trim(),
       };
+      const trimmedDescription = newSubjectDescription.trim();
+      if (trimmedDescription) {
+        payload.descripcion = trimmedDescription;
+      }
 
       const response = await fetch(`${API_URL}/subjects`, {
         method: 'POST',
@@ -399,7 +415,7 @@ export default function MateriasScreen() {
             ) : (
               enrollments.map((enrollment) => (
                 <Text key={enrollment.id} style={styles.enrollmentItem}>
-                  Inscripción {enrollment.id} - Materia {enrollment.subjectId}
+                  Inscripción {enrollment.id} - {getEnrollmentSubjectLabel(enrollment)}
                 </Text>
               ))
             )}
@@ -726,3 +742,4 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
 });
+
